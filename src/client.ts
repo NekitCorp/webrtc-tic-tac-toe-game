@@ -1,8 +1,8 @@
 import "@sakun/system.css";
-import Host from "./components/Host.svelte";
+import Client from "./components/Client.svelte";
 import "./global.css";
 
-const app = new Host({
+const app = new Client({
     target: document.getElementById("app"),
 });
 

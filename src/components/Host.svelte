@@ -3,13 +3,14 @@
     import { HostRTCProvider } from "../rtc-provider";
     import { selectTextOnFocus } from "../utils/actions";
     import Chat from "./Chat.svelte";
+    import Layout from "./Layout.svelte";
 
     let remoteAnswer = "";
 
     const rtcProvider = new HostRTCProvider();
     const { localDescription, messages, connectionState } = rtcProvider;
 
-    $: link = `${window.location.href}client?offer=${window.btoa(
+    $: link = `${window.location.href}client.html?offer=${window.btoa(
         $localDescription
     )}`;
 
@@ -30,27 +31,29 @@
     });
 </script>
 
-{#if $connectionState === "new"}
-    <div class="standard-dialog center">
-        <h1 class="dialog-text">Send link to player #2</h1>
-        <textarea rows={10} use:selectTextOnFocus>{link}</textarea>
-    </div>
-{:else if $connectionState === "connecting"}
-    <div class="standard-dialog center">
-        <h1 class="dialog-text">Then, paste the "answer" you received</h1>
-        <textarea rows={10} bind:value={remoteAnswer} />
-        <button class="btn" on:click={onReceivingOffer}
-            >Okay, I pasted it.</button
-        >
-    </div>
-{:else if $connectionState === "connected"}
-    <Chat messages={$messages} on:send={handleSend} />
-{:else}
-    <div class="standard-dialog center">
-        <h1 class="dialog-text">Wrong connection state</h1>
-        <p class="dialog-text">{$connectionState}</p>
-    </div>
-{/if}
+<Layout>
+    {#if $connectionState === "new"}
+        <div class="standard-dialog center">
+            <h1 class="dialog-text">Send link to player #2</h1>
+            <textarea rows={10} use:selectTextOnFocus>{link}</textarea>
+        </div>
+    {:else if $connectionState === "connecting"}
+        <div class="standard-dialog center">
+            <h1 class="dialog-text">Then, paste the "answer" you received</h1>
+            <textarea rows={10} bind:value={remoteAnswer} />
+            <button class="btn" on:click={onReceivingOffer}
+                >Okay, I pasted it.</button
+            >
+        </div>
+    {:else if $connectionState === "connected"}
+        <Chat messages={$messages} on:send={handleSend} />
+    {:else}
+        <div class="standard-dialog center">
+            <h1 class="dialog-text">Wrong connection state</h1>
+            <p class="dialog-text">{$connectionState}</p>
+        </div>
+    {/if}
+</Layout>
 
 <style>
     button {

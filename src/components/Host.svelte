@@ -9,7 +9,7 @@
     const rtcProvider = new HostRTCProvider();
     const { localDescription, messages, connectionState } = rtcProvider;
 
-    $: link = `${window.location.origin}/client?offer=${window.btoa(
+    $: link = `${window.location.href}client?offer=${window.btoa(
         $localDescription
     )}`;
 

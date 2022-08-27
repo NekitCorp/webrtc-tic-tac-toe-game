@@ -7,7 +7,7 @@
 </script>
 
 <main>
-    <Router {url}>
+    <Router {url} basepath={window.location.pathname}>
         <Route path="client" component={Client} />
         <Route path="/" component={Host} />
     </Router>

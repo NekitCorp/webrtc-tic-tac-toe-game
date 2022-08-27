@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 
 export class RTCProvider {
     protected readonly peerConnection = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.gmx.net" }],
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
     private dataChannel: RTCDataChannel | null = null;
 

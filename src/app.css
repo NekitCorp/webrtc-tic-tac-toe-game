@@ -1,0 +1,15 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+textarea {
+    width: 100%;
+    resize: none;
+    border: 2px solid;
+    box-shadow: 2px 2px;
+    font-family: "Chicago";
+    font-size: 12px;
+    padding: 4px 8px;
+}

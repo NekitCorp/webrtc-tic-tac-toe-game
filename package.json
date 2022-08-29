@@ -20,6 +20,8 @@
         "vite": "^3.0.7"
     },
     "dependencies": {
-        "@sakun/system.css": "^0.1.5"
+        "@sakun/system.css": "^0.1.5",
+        "@xstate/svelte": "^2.0.0",
+        "xstate": "^4.33.4"
     }
 }

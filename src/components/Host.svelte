@@ -1,14 +1,24 @@
 <script lang="ts">
+    import { ChatService } from "../services/chat-service";
+    import { GameService } from "../services/game-service";
+    import type { MachineEvents } from "../services/game-service/types";
     import { onMount } from "svelte";
-    import { HostRTCProvider } from "../rtc-provider";
+    import type { Event } from "xstate";
+    import { HostRTCPeerService } from "../services/rtc-peer-service";
     import { selectTextOnFocus } from "../utils/actions";
     import Chat from "./Chat.svelte";
+    import Game from "./Game.svelte";
     import Layout from "./Layout.svelte";
 
-    let remoteAnswer = "";
+    // services
+    const chat = new ChatService();
+    const { messages } = chat;
+    const game = new GameService(1);
+    const { state } = game;
+    const rtc = new HostRTCPeerService(chat, game);
+    const { localDescription, connectionState } = rtc;
 
-    const rtcProvider = new HostRTCProvider();
-    const { localDescription, messages, connectionState } = rtcProvider;
+    let remoteAnswer = "";
 
     $: link = `${window.location.href}client.html?offer=${window.btoa(
         $localDescription
@@ -16,18 +26,28 @@
 
     function onReceivingOffer() {
         if (remoteAnswer) {
-            rtcProvider.setRemoteDescription(atob(remoteAnswer));
+            rtc.setRemoteDescription(atob(remoteAnswer));
         }
     }
 
-    function handleSend(event: CustomEvent<string>) {
+    function handleSendGameEvent(event: CustomEvent<Event<MachineEvents>>) {
         if (event.detail) {
-            rtcProvider.sendMessage(event.detail);
+            const gameEvent = event.detail;
+            game.send(gameEvent);
+            rtc.sendMessage({ type: "game", event: gameEvent });
+        }
+    }
+
+    function handleSendChatMessage(event: CustomEvent<string>) {
+        if (event.detail) {
+            const text = event.detail;
+            chat.addMessage(text);
+            rtc.sendMessage({ type: "chat", text });
         }
     }
 
     onMount(() => {
-        rtcProvider.createDataChannel();
+        rtc.createDataChannel();
     });
 </script>
 
@@ -46,7 +66,8 @@
             >
         </div>
     {:else if $connectionState === "connected"}
-        <Chat messages={$messages} on:send={handleSend} />
+        <Game {state} on:send={handleSendGameEvent} />
+        <Chat messages={$messages} on:send={handleSendChatMessage} />
     {:else}
         <div class="standard-dialog center">
             <h1 class="dialog-text">Wrong connection state</h1>

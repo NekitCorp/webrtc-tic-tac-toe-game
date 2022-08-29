@@ -1,6 +1,10 @@
-import { RTCProvider } from "./rtc-provider";
+import { RTCPeerService } from "./rtc-peer-service";
+import type { IHostRTCPeerService } from "./types";
 
-export class HostRTCProvider extends RTCProvider {
+export class HostRTCPeerService
+    extends RTCPeerService
+    implements IHostRTCPeerService
+{
     public createDataChannel(label = "sendDataChannel") {
         this.setDataChannel(this.peerConnection.createDataChannel(label));
 

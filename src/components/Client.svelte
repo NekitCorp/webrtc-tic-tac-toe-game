@@ -1,18 +1,38 @@
 <script lang="ts">
-    import { ClientRTCProvider } from "../rtc-provider";
+    import { ChatService } from "../services/chat-service";
+    import { GameService } from "../services/game-service";
+    import type { MachineEvents } from "../services/game-service/types";
+    import type { Event } from "xstate";
+    import { ClientRTCPeerService } from "../services/rtc-peer-service";
     import { selectTextOnFocus } from "../utils/actions";
     import Chat from "./Chat.svelte";
+    import Game from "./Game.svelte";
     import Layout from "./Layout.svelte";
 
-    const rtcProvider = new ClientRTCProvider();
-    const { localDescription, messages, connectionState } = rtcProvider;
+    // services
+    const chat = new ChatService();
+    const { messages } = chat;
+    const game = new GameService(2);
+    const { state } = game;
+    const rtc = new ClientRTCPeerService(chat, game);
+    const { localDescription, connectionState } = rtc;
 
     const urlParams = new URLSearchParams(window.location.search);
-    rtcProvider.connectToDataChannel(window.atob(urlParams.get("offer")));
+    rtc.connectToDataChannel(window.atob(urlParams.get("offer")));
 
-    function handleSend(event: CustomEvent<string>) {
+    function handleSendGameEvent(event: CustomEvent<Event<MachineEvents>>) {
         if (event.detail) {
-            rtcProvider.sendMessage(event.detail);
+            const gameEvent = event.detail;
+            game.send(gameEvent);
+            rtc.sendMessage({ type: "game", event: gameEvent });
+        }
+    }
+
+    function handleSendChatMessage(event: CustomEvent<string>) {
+        if (event.detail) {
+            const text = event.detail;
+            chat.addMessage(text);
+            rtc.sendMessage({ type: "chat", text });
         }
     }
 </script>
@@ -26,7 +46,8 @@
             >
         </div>
     {:else if $connectionState === "connected"}
-        <Chat messages={$messages} on:send={handleSend} />
+        <Game {state} on:send={handleSendGameEvent} />
+        <Chat messages={$messages} on:send={handleSendChatMessage} />
     {:else}
         <div class="standard-dialog center">
             <h1 class="dialog-text">Wrong connection state</h1>

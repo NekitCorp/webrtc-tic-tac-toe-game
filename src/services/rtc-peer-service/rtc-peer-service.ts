@@ -1,13 +1,15 @@
 import { writable } from "svelte/store";
+import type { IChatService } from "../chat-service/types";
+import type { IGameService } from "../game-service/types";
+import type { IRTCPeerService, Message } from "./types";
 
-export class RTCProvider {
+export abstract class RTCPeerService implements IRTCPeerService {
     protected readonly peerConnection = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
     private dataChannel: RTCDataChannel | null = null;
 
     public localDescription = writable<string>("");
-    public messages = writable<string[]>([]);
     public connectionState = writable<RTCPeerConnectionState>(
         this.peerConnection.connectionState
     );
@@ -15,7 +17,10 @@ export class RTCProvider {
         this.peerConnection.iceConnectionState
     );
 
-    constructor() {
+    constructor(
+        private chatService: IChatService,
+        private gameService: IGameService
+    ) {
         this.peerConnection.onicecandidate = this.handleIceCandidate;
         this.peerConnection.onconnectionstatechange =
             this.handleConnectionStateChange;
@@ -57,12 +62,8 @@ export class RTCProvider {
         );
     }
 
-    public sendMessage(message: string) {
-        this.dataChannel.send(message);
-        this.messages.update((prev) => [
-            ...prev,
-            `[${new Date().toLocaleString()}] ${message}`,
-        ]);
+    public sendMessage(message: Message) {
+        this.dataChannel.send(JSON.stringify(message));
     }
 
     private handleIceCandidate = (event: RTCPeerConnectionIceEvent) => {
@@ -105,9 +106,15 @@ export class RTCProvider {
 
     private handleDataChannelMessage = (event: MessageEvent<string>) => {
         console.log("dataChannel message", event);
-        this.messages.update((prev) => [
-            ...prev,
-            `[${new Date().toLocaleString()}] ${event.data}`,
-        ]);
+
+        const message: Message = JSON.parse(event.data);
+
+        if (message.type === "chat") {
+            this.chatService.addMessage(message.text);
+        }
+
+        if (message.type === "game") {
+            this.gameService.send(message.event);
+        }
     };
 }

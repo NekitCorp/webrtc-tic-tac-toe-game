@@ -39,15 +39,19 @@
 
 <Layout>
     {#if $connectionState === "connecting"}
-        <div class="standard-dialog center">
+        <div
+            class="standard-dialog center animate__animated animate__backInLeft"
+        >
             <h1 class="dialog-text">Send your local offer to player #1</h1>
             <textarea rows={10} style="width: 100%;" use:selectTextOnFocus
                 >{window.btoa($localDescription)}</textarea
             >
         </div>
     {:else if $connectionState === "connected"}
-        <Game {state} on:send={handleSendGameEvent} />
-        <Chat messages={$messages} on:send={handleSendChatMessage} />
+        <div class="game animate__animated animate__backInLeft">
+            <Game {state} on:send={handleSendGameEvent} />
+            <Chat messages={$messages} on:send={handleSendChatMessage} />
+        </div>
     {:else}
         <div class="standard-dialog center">
             <h1 class="dialog-text">Wrong connection state</h1>
@@ -55,3 +59,16 @@
         </div>
     {/if}
 </Layout>
+
+<style>
+    .game {
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (min-width: 480px) {
+        .game {
+            gap: 64px;
+        }
+    }
+</style>

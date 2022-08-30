@@ -18,19 +18,21 @@
 
 <section>
     <!-- header -->
-    {#if $state.value === "playing"}
-        <h2>{$state.context.isYourMove ? "Your turn" : "Opponent's move"}</h2>
-    {:else if $state.value === "winner"}
-        <h2>
-            {$state.context.isYouWin ? "You won!" : "You lose"}
-            <button on:click={() => send("RESET")}>Reset</button>
-        </h2>
-    {:else if $state.value === "draw"}
-        <h2>Draw</h2>
-        <button on:click={() => send("RESET")}>Reset</button>
-    {:else}
-        <h2>Wrong state!</h2>
-    {/if}
+    <div class="header">
+        {#if $state.value === "playing"}
+            <h2>
+                {$state.context.isYourMove ? "Your turn" : "Opponent's move"}
+            </h2>
+        {:else if $state.value === "winner"}
+            <h2>{$state.context.isYouWin ? "You won!" : "You lose"}</h2>
+            <button class="btn" on:click={() => send("RESET")}>Reset</button>
+        {:else if $state.value === "draw"}
+            <h2>Draw</h2>
+            <button class="btn" on:click={() => send("RESET")}>Reset</button>
+        {:else}
+            <h2>Wrong state!</h2>
+        {/if}
+    </div>
 
     <!-- game board -->
     <div class="grid">
@@ -47,10 +49,6 @@
 </section>
 
 <style>
-    h2 {
-        text-align: center;
-    }
-
     .grid {
         height: 50vmin;
         width: 50vmin;
@@ -61,12 +59,20 @@
         margin: 0 auto;
     }
 
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+
     .cell {
         position: relative;
         box-sizing: border-box;
         background: white;
         border: 2px solid;
         box-shadow: 2px 2px;
+        padding: 0;
     }
 
     .cell:not([data-player]) {
@@ -80,11 +86,12 @@
     .cell[data-player="x"]::after {
         content: "";
         position: absolute;
-        height: 100%;
-        width: 0.2rem;
-        background: red;
-        left: calc(50% - 0.1rem);
-        top: 0;
+        top: 50%;
+        left: 50%;
+        border-top: 0.2rem solid red;
+        transform: rotate(45deg);
+        transform-origin: 50% 50%;
+        animation: line 0.2s ease 0.1s forwards;
     }
     .cell[data-player="x"]::before {
         transform: rotate(-45deg);
@@ -102,5 +109,27 @@
         position: absolute;
         border-radius: 50%;
         border: 0.2rem solid blue;
+        animation: scale 0.2s ease 0.1s forwards;
+        scale: 0;
+    }
+
+    @keyframes line {
+        0% {
+            left: 50%;
+            width: 0;
+        }
+        100% {
+            left: 0%;
+            width: 100%;
+        }
+    }
+
+    @keyframes scale {
+        0% {
+            scale: 0;
+        }
+        100% {
+            scale: 1;
+        }
     }
 </style>

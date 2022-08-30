@@ -53,12 +53,16 @@
 
 <Layout>
     {#if $connectionState === "new"}
-        <div class="standard-dialog center">
+        <div
+            class="standard-dialog center animate__animated animate__backInLeft"
+        >
             <h1 class="dialog-text">Send link to player #2</h1>
             <textarea rows={10} use:selectTextOnFocus>{link}</textarea>
         </div>
     {:else if $connectionState === "connecting"}
-        <div class="standard-dialog center">
+        <div
+            class="standard-dialog center animate__animated animate__backInLeft"
+        >
             <h1 class="dialog-text">Then, paste the "answer" you received</h1>
             <textarea rows={10} bind:value={remoteAnswer} />
             <button class="btn" on:click={onReceivingOffer}
@@ -66,8 +70,10 @@
             >
         </div>
     {:else if $connectionState === "connected"}
-        <Game {state} on:send={handleSendGameEvent} />
-        <Chat messages={$messages} on:send={handleSendChatMessage} />
+        <div class="game animate__animated animate__backInLeft">
+            <Game {state} on:send={handleSendGameEvent} />
+            <Chat messages={$messages} on:send={handleSendChatMessage} />
+        </div>
     {:else}
         <div class="standard-dialog center">
             <h1 class="dialog-text">Wrong connection state</h1>
@@ -79,5 +85,17 @@
 <style>
     button {
         margin-top: 8px;
+    }
+
+    .game {
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (min-width: 480px) {
+        .game {
+            flex-direction: row;
+            gap: 64px;
+        }
     }
 </style>

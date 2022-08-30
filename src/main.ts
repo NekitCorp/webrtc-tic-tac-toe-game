@@ -1,4 +1,5 @@
 import "@sakun/system.css";
+import "animate.css";
 import Host from "./components/Host.svelte";
 import "./global.css";
 

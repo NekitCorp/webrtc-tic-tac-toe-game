@@ -1,9 +1,7 @@
 import { writable } from "svelte/store";
-import type { IChatService } from "../chat-service/types";
-import type { IGameService } from "../game-service/types";
 import type { IRTCPeerService, Message } from "./types";
 
-export abstract class RTCPeerService implements IRTCPeerService {
+export class RTCPeerService implements IRTCPeerService {
     protected readonly peerConnection = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
@@ -17,10 +15,7 @@ export abstract class RTCPeerService implements IRTCPeerService {
         this.peerConnection.iceConnectionState
     );
 
-    constructor(
-        private chatService: IChatService,
-        private gameService: IGameService
-    ) {
+    constructor(private onMessage: (message: string) => void) {
         this.peerConnection.onicecandidate = this.handleIceCandidate;
         this.peerConnection.onconnectionstatechange =
             this.handleConnectionStateChange;
@@ -106,15 +101,6 @@ export abstract class RTCPeerService implements IRTCPeerService {
 
     private handleDataChannelMessage = (event: MessageEvent<string>) => {
         console.log("dataChannel message", event);
-
-        const message: Message = JSON.parse(event.data);
-
-        if (message.type === "chat") {
-            this.chatService.addMessage(message.text);
-        }
-
-        if (message.type === "game") {
-            this.gameService.send(message.event);
-        }
+        this.onMessage(event.data);
     };
 }

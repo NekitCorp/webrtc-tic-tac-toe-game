@@ -1,17 +1,12 @@
 <script lang="ts">
-    import type {
-        MachineContext,
-        MachineEvents,
-    } from "src/services/game-service/types";
+    import type { GameEvent, GameState } from "src/services/game-service/types";
     import { createEventDispatcher } from "svelte";
-    import type { Readable } from "svelte/store";
-    import type { Event, State } from "xstate";
 
-    export let state: Readable<State<MachineContext, MachineEvents>>;
+    export let state: GameState;
 
     const dispatch = createEventDispatcher();
 
-    const send = (event: Event<MachineEvents>) => {
+    const send = (event: GameEvent) => {
         dispatch("send", event);
     };
 </script>
@@ -50,13 +45,20 @@
 
 <style>
     .grid {
-        height: 50vmin;
-        width: 50vmin;
+        width: calc(90vmin - 32px);
+        height: calc(90vmin - 32px);
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: repeat(3, 1fr);
         grid-gap: 1rem;
         margin: 0 auto;
+    }
+
+    @media (min-width: 960px) {
+        .grid {
+            width: 50vmin;
+            height: 50vmin;
+        }
     }
 
     .header {

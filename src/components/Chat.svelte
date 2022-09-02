@@ -1,7 +1,8 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import type { Writable } from "svelte/store";
 
-    export let messages: string[];
+    export let messages: Writable<string[]>;
     let message = "";
 
     const dispatch = createEventDispatcher();
@@ -16,7 +17,7 @@
 <section class="container">
     <h2>Chat</h2>
     <div class="standard-dialog center chat">
-        {#each messages as message}
+        {#each $messages as message}
             <p class="animate__animated animate__bounceInLeft">{message}</p>
         {/each}
     </div>

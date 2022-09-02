@@ -8,16 +8,13 @@ const repositoryName = process.env.REPOSITORY_NAME;
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [svelte()],
+    resolve: {
+        alias: {
+            src: resolve(__dirname, "src"),
+        },
+    },
     server: {
         host: true,
-    },
-    build: {
-        rollupOptions: {
-            input: {
-                main: resolve(__dirname, "index.html"),
-                client: resolve(__dirname, "client.html"),
-            },
-        },
     },
     base: isProd ? `/${repositoryName}` : "/",
 });

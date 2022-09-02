@@ -1,16 +1,15 @@
 import { useMachine } from "@xstate/svelte";
-import type { Readable } from "svelte/store";
-import type { Event, State } from "xstate";
+import type { Event } from "xstate";
 import { createGameMachine } from "./game-machine";
 import type {
+    GameState,
     IGameService,
-    MachineContext,
     MachineEvents,
     PlayerNumber,
 } from "./types";
 
 export class GameService implements IGameService {
-    public readonly state: Readable<State<MachineContext, MachineEvents>>;
+    public readonly state: GameState;
     public readonly send: (event: Event<MachineEvents>) => void;
 
     constructor(private player: PlayerNumber) {
@@ -22,7 +21,7 @@ export class GameService implements IGameService {
         this.send = send;
 
         service.onTransition((state) => {
-            console.log(state);
+            console.log("[GAME STATE]", state);
         });
     }
 }

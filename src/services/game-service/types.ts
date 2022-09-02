@@ -15,8 +15,11 @@ export type MachineContext = {
 
 export type MachineEvents = { type: "PLAY"; value: number } | { type: "RESET" };
 
-export interface IGameService {
-    state: Readable<State<MachineContext, MachineEvents>>;
+export type GameState = Readable<State<MachineContext, MachineEvents>>;
+export type GameEvent = Event<MachineEvents>;
 
-    send: (event: Event<MachineEvents>) => void;
+export interface IGameService {
+    state: GameState;
+
+    send: (event: GameEvent) => void;
 }

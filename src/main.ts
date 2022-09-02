@@ -1,9 +1,9 @@
 import "@sakun/system.css";
 import "animate.css";
-import Host from "./components/Host.svelte";
+import App from "./App.svelte";
 import "./global.css";
 
-const app = new Host({
+const app = new App({
     target: document.getElementById("app"),
 });
 

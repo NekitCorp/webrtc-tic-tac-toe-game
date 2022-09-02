@@ -23,6 +23,7 @@
         "@sakun/system.css": "^0.1.5",
         "@xstate/svelte": "^2.0.0",
         "animate.css": "^4.1.1",
+        "peerjs": "^1.4.7",
         "xstate": "^4.33.4"
     }
 }

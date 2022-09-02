@@ -1,12 +1,12 @@
 <nav>
-    <a class="rtc-link" href="/#host">
+    <a class="rtc-link" href="#host">
         <h1>Vanilla WebRTC</h1>
         <h2>
             Connections between two peers are represented by the
             RTCPeerConnection interface.
         </h2>
     </a>
-    <a class="peer-js-link" href="/#peerjs">
+    <a class="peer-js-link" href="#peerjs">
         <h1>PeerJS</h1>
         <h2>
             Wraps the browser's WebRTC implementation to provide a complete,

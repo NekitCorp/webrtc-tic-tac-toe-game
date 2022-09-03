@@ -7,6 +7,7 @@
     import { HostRTCPeerService } from "../services/rtc-peer-service";
     import { selectTextOnFocus } from "../utils/actions";
     import Chat from "./Chat.svelte";
+    import CopyButton from "./CopyButton.svelte";
     import Game from "./Game.svelte";
 
     // services
@@ -59,18 +60,36 @@
     });
 </script>
 
-{#if $connectionState === "new"}
-    <div class="standard-dialog center animate__animated animate__backInLeft">
-        <h1 class="dialog-text">Send link to player #2</h1>
-        <textarea rows={10} use:selectTextOnFocus>{link}</textarea>
+{#if $connectionState === "new" || $connectionState === "disconnected"}
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Connection setup</h1>
+        </div>
+        {#if $connectionState === "disconnected"}
+            <div class="details-bar">
+                Remote peer closes the data connection.
+            </div>
+        {/if}
+        <div class="separator" />
+        <div class="window-pane">
+            <p>Send link to player #2</p>
+            <textarea rows={10} use:selectTextOnFocus>{link}</textarea>
+            <CopyButton textToCopy={link} />
+        </div>
     </div>
 {:else if $connectionState === "connecting"}
-    <div class="standard-dialog center animate__animated animate__backInLeft">
-        <h1 class="dialog-text">Then, paste the "answer" you received</h1>
-        <textarea rows={10} bind:value={remoteAnswer} />
-        <button class="btn" on:click={onReceivingOffer}
-            >Okay, I pasted it.</button
-        >
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Connection setup</h1>
+        </div>
+        <div class="separator" />
+        <div class="window-pane">
+            <p>Then, paste the "answer" you received</p>
+            <textarea rows={10} bind:value={remoteAnswer} />
+            <button class="btn" on:click={onReceivingOffer}
+                >Okay, I pasted it.</button
+            >
+        </div>
     </div>
 {:else if $connectionState === "connected"}
     <div class="game animate__animated animate__backInLeft">
@@ -78,9 +97,12 @@
         <Chat messages={chat.messages} on:send={handleSendChatMessage} />
     </div>
 {:else}
-    <div class="standard-dialog center">
-        <h1 class="dialog-text">Wrong connection state</h1>
-        <p class="dialog-text">{$connectionState}</p>
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Wrong connection state</h1>
+        </div>
+        <div class="separator" />
+        <div class="window-pane">{$connectionState}</div>
     </div>
 {/if}
 

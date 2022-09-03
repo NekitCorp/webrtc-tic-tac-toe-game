@@ -9,6 +9,10 @@ body {
     padding: 0;
 }
 
+input {
+    box-shadow: 2px 2px;
+}
+
 textarea {
     width: 100%;
     resize: none;

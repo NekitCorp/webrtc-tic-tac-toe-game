@@ -5,14 +5,16 @@
     import { PeerJSService } from "src/services/peerjs-service";
     import type { Message } from "src/services/rtc-peer-service/types";
     import Chat from "./Chat.svelte";
+    import CopyButton from "./CopyButton.svelte";
     import Game from "./Game.svelte";
 
     let remoteId: string;
-    let copyButtonText = "Copy";
+
+    const urlParams = new URLSearchParams(window.location.search);
 
     const chat = new ChatService();
 
-    const peer = new PeerJSService((data: Message) => {
+    const peer = new PeerJSService(urlParams.get("id"), (data: Message) => {
         if (data.type === "chat") {
             chat.addMessage(data.text);
         }
@@ -27,6 +29,10 @@
         $connectionState.type === "connected"
             ? new GameService($connectionState.side === "host" ? 1 : 2)
             : null;
+    $: link = `${window.location.href.replace(
+        window.location.hash,
+        ""
+    )}?id=${$id}#peerjs`;
 
     function connect(e: SubmitEvent) {
         e.preventDefault();
@@ -50,45 +56,78 @@
             peer.send({ type: "chat", text });
         }
     }
-
-    function copy() {
-        navigator.clipboard.writeText($id).then(
-            () => {
-                console.log("Async: Copying to clipboard was successful!");
-                copyButtonText = "Copied!";
-                setTimeout(() => (copyButtonText = "Copy"), 2000);
-            },
-            (err) => console.error("Async: Could not copy text: ", err)
-        );
-    }
 </script>
 
 {#if $connectionState.type === "init"}
     <p>Connection to the PeerServer...</p>
+{:else if $connectionState.type === "connecting"}
+    <p>Connectioning to the remote player {urlParams.get("id")}...</p>
 {:else if $connectionState.type === "ready" || $connectionState.type === "disconnected"}
-    {#if $connectionState.type === "disconnected"}
-        <h1>Remote peer closes the data connection.</h1>
-    {/if}
-    <h1>
-        My peer id is: <b>{$id}</b>
-        <button class="btn" on:click={copy}>{copyButtonText}</button>
-    </h1>
-    <form on:submit={connect}>
-        <input type="text" bind:value={remoteId} />
-        <button type="submit" class="btn">Connect</button>
-    </form>
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Connection setup</h1>
+        </div>
+        {#if $connectionState.type === "disconnected"}
+            <div class="details-bar">
+                Remote peer closes the data connection.
+            </div>
+        {/if}
+        <div class="separator" />
+        <div class="window-pane">
+            <p>
+                Send <a href={link}>link</a>
+                <CopyButton textToCopy={link} /> or my peer id
+                <span class="id">{$id}</span>
+                <CopyButton textToCopy={$id} /> to another player.
+            </p>
+            <div class="connectForm">
+                <p>Or paste another player's id here:</p>
+                <form on:submit={connect}>
+                    <input type="text" bind:value={remoteId} />
+                    <button type="submit" class="btn">Connect</button>
+                </form>
+            </div>
+        </div>
+    </div>
 {:else if $connectionState.type === "connected"}
     <div class="game animate__animated animate__backInLeft">
         {#if game}<Game state={game.state} on:send={handleSendGameEvent} />{/if}
         <Chat messages={chat.messages} on:send={handleSendChatMessage} />
     </div>
 {:else if $connectionState.type === "error"}
-    <p>Error</p>
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Error</h1>
+        </div>
+        <div class="separator" />
+        <div class="window-pane">{$connectionState.error}</div>
+    </div>
 {:else}
     <p>Wrong state</p>
 {/if}
 
 <style>
+    .id {
+        text-decoration: underline;
+    }
+
+    .connectForm {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    @media (min-width: 960px) {
+        .connectForm {
+            flex-direction: row;
+        }
+    }
+
+    .connectForm p {
+        margin: 0;
+    }
+
     .game {
         display: flex;
         flex-direction: column;

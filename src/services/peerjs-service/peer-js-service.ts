@@ -1,14 +1,12 @@
 import { Peer } from "peerjs";
 import { get, writable } from "svelte/store";
-import type { IChatService } from "../chat-service/types";
-import type { IGameService } from "../game-service/types";
-import type { Message } from "../rtc-peer-service/types";
 
 type Connection = any;
 export type ConnectionSide = "host" | "client";
 type ConnectionState =
     | { type: "init" }
     | { type: "ready" }
+    | { type: "connecting" }
     | { type: "connected"; connection: Connection; side: ConnectionSide }
     | { type: "disconnected" }
     | { type: "error"; error: unknown };
@@ -19,11 +17,20 @@ export class PeerJSService {
 
     protected readonly peer = new Peer();
 
-    constructor(private onMessage: (data: unknown) => void) {
+    constructor(
+        remoteId: string | undefined,
+        private onMessage: (data: unknown) => void
+    ) {
         this.peer.on("open", (id) => {
             console.log("Connection to the PeerServer is established.");
             this.id.set(id);
-            this.connectionState.set({ type: "ready" });
+
+            if (remoteId) {
+                this.connectionState.set({ type: "connecting" });
+                this.connect(remoteId);
+            } else {
+                this.connectionState.set({ type: "ready" });
+            }
         });
         this.peer.on("error", (error) => {
             console.error("Failed to connect to the PeerServer.", error);
@@ -55,7 +62,10 @@ export class PeerJSService {
         const connectionState = get(this.connectionState);
 
         // allow only 1 connection
-        if (connectionState.type === "ready") {
+        if (
+            connectionState.type === "ready" ||
+            connectionState.type === "connecting"
+        ) {
             connection.on("open", () => {
                 console.log("The connection is established and ready-to-use.");
                 this.connectionState.set({

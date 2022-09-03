@@ -6,6 +6,7 @@
     import { ClientRTCPeerService } from "../services/rtc-peer-service";
     import { selectTextOnFocus } from "../utils/actions";
     import Chat from "./Chat.svelte";
+    import CopyButton from "./CopyButton.svelte";
     import Game from "./Game.svelte";
 
     // services
@@ -45,11 +46,18 @@
 </script>
 
 {#if $connectionState === "connecting"}
-    <div class="standard-dialog center animate__animated animate__backInLeft">
-        <h1 class="dialog-text">Send your local offer to player #1</h1>
-        <textarea rows={10} style="width: 100%;" use:selectTextOnFocus
-            >{window.btoa($localDescription)}</textarea
-        >
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Connection setup</h1>
+        </div>
+        <div class="separator" />
+        <div class="window-pane">
+            <p>Send your local offer to player #1</p>
+            <textarea rows={10} style="width: 100%;" use:selectTextOnFocus
+                >{window.btoa($localDescription)}</textarea
+            >
+            <CopyButton textToCopy={window.btoa($localDescription)} />
+        </div>
     </div>
 {:else if $connectionState === "connected"}
     <div class="game animate__animated animate__backInLeft">
@@ -57,9 +65,12 @@
         <Chat messages={chat.messages} on:send={handleSendChatMessage} />
     </div>
 {:else}
-    <div class="standard-dialog center">
-        <h1 class="dialog-text">Wrong connection state</h1>
-        <p class="dialog-text">{$connectionState}</p>
+    <div class="window animate__animated animate__backInLeft">
+        <div class="title-bar">
+            <h1 class="title">Wrong connection state</h1>
+        </div>
+        <div class="separator" />
+        <div class="window-pane">{$connectionState}</div>
     </div>
 {/if}
 
